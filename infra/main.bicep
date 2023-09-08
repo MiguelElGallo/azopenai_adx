@@ -14,11 +14,6 @@ param location string
 
 param resourceGroupName string = ''
 
-param adxSKU string = 'Standard_D13_v2'
-
-param keyVaultName string = 'keyvaultadxai'
-
-param openAiServiceName string = ''
 
 @description('Location for the OpenAI resource group')
 @allowed(['canadaeast', 'eastus', 'francecentral', 'japaneast', 'northcentralus','westeruope'])
