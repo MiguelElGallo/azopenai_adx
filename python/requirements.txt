@@ -1,0 +1,9 @@
+openai
+pandas
+tiktoken
+azure-identity
+azure-cosmos
+matplotlib
+plotly
+scipy
+sklearn

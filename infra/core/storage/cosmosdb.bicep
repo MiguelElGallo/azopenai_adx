@@ -1,3 +1,16 @@
+@description('Friendly name for the SQL Role Definition')
+param roleDefinitionName string = 'My Read Write Role'
+
+@description('Data actions permitted by the Role Definition')
+param dataActions array = [
+  'Microsoft.DocumentDB/databaseAccounts/readMetadata'
+  'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/items/*'
+  'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/executeQuery'
+]
+
+@description('Object ID of the AAD identity. Must be a GUID.')
+param principalId string
+
 @description('Cosmos DB account name')
 param name string
 
@@ -35,6 +48,8 @@ param autoscaleMaxThroughput int = 4000
 @description('Time to Live for data in analytical store. (-1 no expiry)')
 @minValue(-1)
 @maxValue(2147483647)
+
+
 param analyticalStoreTTL int = -1
 var accountName = name 
 var locations = [
@@ -54,6 +69,10 @@ var throughput_Policy = {
     }
   }
 }
+
+
+var roleDefinitionId = guid('sql-role-definition-', principalId, databaseAccount.id)
+var roleAssignmentId = guid(roleDefinitionId, principalId, databaseAccount.id)
 
 resource databaseAccount 'Microsoft.DocumentDB/databaseAccounts@2021-04-15' = {
   name: accountName
@@ -92,6 +111,33 @@ resource sqlContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/contai
       }
     }
     }
+}
+
+resource sqlRoleDefinition 'Microsoft.DocumentDB/databaseAccounts/sqlRoleDefinitions@2021-04-15' = {
+  parent: databaseAccount
+  name: roleDefinitionId
+  properties: {
+    roleName: roleDefinitionName
+    type: 'CustomRole'
+    assignableScopes: [
+      databaseAccount.id
+    ]
+    permissions: [
+      {
+        dataActions: dataActions
+      }
+    ]
+  }
+}
+
+resource sqlRoleAssignment 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments@2021-04-15' = {
+  parent: databaseAccount
+  name: roleAssignmentId
+  properties: {
+    roleDefinitionId: sqlRoleDefinition.id
+    principalId: principalId
+    scope: databaseAccount.id
+  }
 }
 
 output cosmosendpoint string = databaseAccount.properties.documentEndpoint

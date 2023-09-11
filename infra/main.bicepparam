@@ -12,5 +12,5 @@ param chatGptModelVersion = '0613'
 param embeddingDeploymentName = 'text-embedding-ada-002-dep'
 param embeddingDeploymentCapacity = 30
 param embeddingModelName = 'text-embedding-ada-002'
-param principalId = ''
+param principalId = readEnvironmentVariable('AZURE_PRINCIPAL_ID')
 

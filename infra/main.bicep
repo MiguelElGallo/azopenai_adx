@@ -115,16 +115,16 @@ module openAi 'core/ai/cognitiveservices.bicep' = {
   }
 }
 
-// // USER ROLES
-// module openAiRoleUser 'core/security/role.bicep' = {
-//   scope: resourceGroup
-//   name: 'openai-role-user'
-//   params: {
-//     principalId: adxCluster.outputs.adxClusterIdentity
-//     roleDefinitionId: '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd'
-//     principalType: 'User'
-//   }
-// }
+// Assing OpenAI role the the deploying user
+module openAiRoleUser 'core/security/role.bicep' = {
+   scope: resourceGroup
+   name: 'openai-role-user'
+   params: {
+     principalId: principalId
+     roleDefinitionId: '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd'
+     principalType: 'User'
+   }
+}
 
 module CosmosDB 'core/storage/cosmosdb.bicep' = {
   name: 'cosmosdb'
@@ -133,8 +133,7 @@ module CosmosDB 'core/storage/cosmosdb.bicep' = {
     name: '${abbrs.documentDBDatabaseAccounts}${resourceToken}'
     location: location
     tags: tags
-
-
+    principalId: principalId
   }
 }
 
@@ -150,3 +149,14 @@ module CosmosDB 'core/storage/cosmosdb.bicep' = {
 // }
 
 
+output AZURE_LOCATION string = location
+output AZURE_TENANT_ID string = tenant().tenantId
+output AZURE_RESOURCE_GROUP string = resourceGroup.name
+
+output AZURE_OPENAI_SERVICE string = openAi.outputs.name
+output AZURE_OPENAI_RESOURCE_GROUP string =resourceGroup.name
+output AZURE_OPENAI_CHATGPT_DEPLOYMENT string = chatGptDeploymentName
+output AZURE_OPENAI_CHATGPT_MODEL string = chatGptModelName
+output AZURE_OPENAI_EMB_DEPLOYMENT string = embeddingDeploymentName
+output AZURE_OPENAI_EMB_MODEL_NAME string = embeddingModelName
+output COSMOS_ENDPOINT string = CosmosDB.outputs.cosmosendpoint
